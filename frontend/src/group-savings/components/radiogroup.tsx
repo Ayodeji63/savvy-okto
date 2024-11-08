@@ -421,7 +421,7 @@ const GroupRadio: React.FC<GroupProps> = ({
                     <div className="flex items-center justify-center gap-x-5"></div>
                     <Button
                       className="flex text-white bg-[#4A9F17]"
-                      onClick={() => deposit()}
+                      onClick={() => makeDeposit()}
                     >
                       {isLoading && (
                         <Loader2 className="mr-2 h-4 w-4 animate-spin" />
