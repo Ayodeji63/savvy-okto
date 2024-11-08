@@ -28,7 +28,7 @@ import { Loader2 } from "lucide-react";
 import BackButton from "../../components/common/back-button";
 import FormErrorTextMessage from "../../components/common/form-error-text-message";
 import { Button } from "../../components/ui/button";
-import { publicClient } from "../../publicClient";
+import { publicClient, walletClient } from "../../publicClient";
 import { abi, contractAddress } from "../../contract";
 import { TOKEN } from "../../lib/libs";
 import { routes } from "../../lib/routes";
@@ -273,76 +273,108 @@ const GroupPageClientSide = ({ id }: any) => {
     }
   }
 
-
   const repayLoan = async (amount: number) => {
     try {
-      if (!id) return;
-
       setIsLoading(true);
-      console.log("Base address is given as", baseAddress);
-      const res = await executeRawTransaction({
-        network_name: "BASE",
-        transaction: {
-          from: baseAddress,
-          to: contractAddress,
-          value: "0x0",
-          data: encodeFunctionData({
-            abi: abi ?? [],
-            functionName: 'repayLoan',
-            args: [id, parseEther(String(amount)), baseAddress]
-          })
-        }
-      })
-      console.log(res);
-      const query: RawTransactionStatusQuery = {
-        order_id: res?.jobId
-      }
-      let status = await getRawTransactionStatus(query)
-      console.log(status);
-      console.log("Total Length", status?.total);
-      console.log("Total jobs", status?.jobs[0]);
-      while (status?.jobs[0].status === "RUNNING" || status?.jobs[0].status === "PENDING") {
-        await new Promise(resolve => setTimeout(resolve, 5000)); // Wait for 5 seconds
-        status = await getRawTransactionStatus(query);
-        console.log(status?.jobs[0].status);
-      }
+      setText("Depositing....")
+      const gasPrice = await publicClient.getGasPrice();
+      const gasPriceWithPremium = gasPrice * 120n / 100n; // 20% premium
 
-      if (status?.jobs[0].status === "SUCCESS") {
-        console.log("Transaction successful!");
-        setText("Success!");
-        // Handle successful transaction
-      } else if (status?.jobs[0].status === "FAILED") {
-        console.error("Transaction failed:", status?.jobs[0].status);
-        setText("Failed!");
+      const { request } = await publicClient.simulateContract({
+        address: contractAddress,
+        abi: abi,
+        functionName: 'repayLoan',
+        args: [id, parseEther(String(amount)), baseAddress],
+        account: walletClient.account,
+        gas: await publicClient.estimateContractGas({
+          address: contractAddress,
+          abi: abi,
+          functionName: 'repayLoan',
+          args: [id, parseEther(String(amount)), baseAddress],
+          account: walletClient.account
+        }),
+        maxFeePerGas: gasPriceWithPremium,
+        maxPriorityFeePerGas: gasPriceWithPremium / 2n
+      });
 
-        // Handle failed transaction
-      } else if (status?.jobs[0].status === "PUBLISHED") {
-        console.error("Transaction Published:", status?.jobs[0].status);
-        setText("Published");
-
-        // Handle failed transaction
-      } else if (status?.jobs[0].status === "WAITING_FOR_SIGNATURE") {
-        console.error("Transaction WAITING_FOR_SIGNATURE:", status?.jobs[0].status);
-        setText("WAITING_FOR_SIGNATURE");
-
-        // Handle failed transaction
-      }
-      else {
-        console.error("Unexpected transaction status:", status?.jobs[0].status);
-        // Handle unexpected status
-      }
-
-      const hash: string = String(status?.jobs[0].transaction_hash) ?? "";
-      console.log("Deposit Hash %s", hash);
-
+      const hash = await walletClient.writeContract(request);
+      console.log(`Deposit Transaction hash:`, hash);
       setIsLoading(false);
-      return hash;
     } catch (error) {
+      console.error(error);
       setIsLoading(false);
-      setText("Failed, Try Again!")
-      console.log("An error occured ", error);
     }
   }
+
+  // const repayLoan = async (amount: number) => {
+  //   try {
+  //     if (!id) return;
+
+  //     setIsLoading(true);
+  //     console.log("Base address is given as", baseAddress);
+  //     const res = await executeRawTransaction({
+  //       network_name: "BASE",
+  //       transaction: {
+  //         from: baseAddress,
+  //         to: contractAddress,
+  //         value: "0x0",
+  //         data: encodeFunctionData({
+  //           abi: abi ?? [],
+  //           functionName: 'repayLoan',
+  //           args: [id, parseEther(String(amount)), baseAddress]
+  //         })
+  //       }
+  //     })
+  //     console.log(res);
+  //     const query: RawTransactionStatusQuery = {
+  //       order_id: res?.jobId
+  //     }
+  //     let status = await getRawTransactionStatus(query)
+  //     console.log(status);
+  //     console.log("Total Length", status?.total);
+  //     console.log("Total jobs", status?.jobs[0]);
+  //     while (status?.jobs[0].status === "RUNNING" || status?.jobs[0].status === "PENDING") {
+  //       await new Promise(resolve => setTimeout(resolve, 5000)); // Wait for 5 seconds
+  //       status = await getRawTransactionStatus(query);
+  //       console.log(status?.jobs[0].status);
+  //     }
+
+  //     if (status?.jobs[0].status === "SUCCESS") {
+  //       console.log("Transaction successful!");
+  //       setText("Success!");
+  //       // Handle successful transaction
+  //     } else if (status?.jobs[0].status === "FAILED") {
+  //       console.error("Transaction failed:", status?.jobs[0].status);
+  //       setText("Failed!");
+
+  //       // Handle failed transaction
+  //     } else if (status?.jobs[0].status === "PUBLISHED") {
+  //       console.error("Transaction Published:", status?.jobs[0].status);
+  //       setText("Published");
+
+  //       // Handle failed transaction
+  //     } else if (status?.jobs[0].status === "WAITING_FOR_SIGNATURE") {
+  //       console.error("Transaction WAITING_FOR_SIGNATURE:", status?.jobs[0].status);
+  //       setText("WAITING_FOR_SIGNATURE");
+
+  //       // Handle failed transaction
+  //     }
+  //     else {
+  //       console.error("Unexpected transaction status:", status?.jobs[0].status);
+  //       // Handle unexpected status
+  //     }
+
+  //     const hash: string = String(status?.jobs[0].transaction_hash) ?? "";
+  //     console.log("Deposit Hash %s", hash);
+
+  //     setIsLoading(false);
+  //     return hash;
+  //   } catch (error) {
+  //     setIsLoading(false);
+  //     setText("Failed, Try Again!")
+  //     console.log("An error occured ", error);
+  //   }
+  // }
 
   // const approve = async (amount: number) => {
   //   try {
