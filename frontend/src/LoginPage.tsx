@@ -13,7 +13,6 @@ import PageWrapper from "./components/common/page-wrapper";
 import { Icons } from "./components/common/icons";
 // import { createUser, findUser } from "./lib/user";
 import { notification } from "./utils/notification";
-import { userSchema } from "./types/utils";
 import { Button } from "./components/ui/button";
 
 
@@ -32,7 +31,6 @@ const LoginPage = ({ setAuthToken, authToken, handleLogout }) => {
   //@ts-ignore
   const { userGroupId, setUserGroupId, setUser, user, setTransactions, userDetails, setUserDetails, baseAddress, setBaseAddress } =
     useAuthContext();
-  const [showSignUp, setShowSignUp] = useState(false);
   const [loading, setLoading] = useState(false);
   const [_idToken, set_IdToken] = useState();
   const [wallets, setWallets] = useState(null);
@@ -62,14 +60,6 @@ const LoginPage = ({ setAuthToken, authToken, handleLogout }) => {
     resolver: yupResolver(loginFormSchema)
   };
 
-  const containerStyle = {
-    display: "flex",
-    flexDirection: "column",
-    alignItems: "center",
-    padding: "20px",
-    maxWidth: "800px",
-    margin: "0 auto",
-  };
 
   //@ts-ignore
   const handleGoogleLogin = async (credentialResponse) => {
@@ -94,10 +84,6 @@ const LoginPage = ({ setAuthToken, authToken, handleLogout }) => {
     });
   };
 
-  const onLogoutClick = () => {
-    handleLogout(); // Clear the authToken
-    navigate("/"); // Navigate back to the login page
-  };
 
   const fetchWallets = async () => {
     try {

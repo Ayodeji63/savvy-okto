@@ -1,10 +1,8 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { OktoProvider, BuildType } from 'okto-sdk-react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import LoginPage from './LoginPage';
-import RawTxnPage from './RawTxnPage';
-import WidgetPage from './WidgetPage';
-import HomePage from './HomePage';
+
 import LandingPage from "./Landing";
 import AuthContextProvider from './context/AuthContext';
 import DashboardPage from './dashboard/dashboard/page';
@@ -29,9 +27,9 @@ function App() {
             <Route path="/login" element={<LoginPage setAuthToken={setAuthToken} authToken={authToken} handleLogout={handleLogout} />} />
             <Route path='/dashboard/dashboard/page' element={<DashboardPage />} />
             <Route path='/group-savings/page' element={<DepositPage />} />
-            <Route path="/home" element={authToken ? <HomePage authToken={authToken} handleLogout={handleLogout} /> : <Navigate to="/" />} />
+            {/* <Route path="/home" element={authToken ? <HomePage authToken={authToken} handleLogout={handleLogout} /> : <Navigate to="/" />} />
             <Route path="/raw" element={authToken ? <RawTxnPage authToken={authToken} handleLogout={handleLogout} /> : <Navigate to="/" />} />
-            <Route path="/widget" element={authToken ? <WidgetPage authToken={authToken} handleLogout={handleLogout} /> : <Navigate to="/" />} />
+            <Route path="/widget" element={authToken ? <WidgetPage authToken={authToken} handleLogout={handleLogout} /> : <Navigate to="/" />} /> */}
           </Routes>
         </OktoProvider>
       </AuthContextProvider>
