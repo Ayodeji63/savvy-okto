@@ -140,7 +140,7 @@ const LoginPage = ({ setAuthToken, authToken, handleLogout }) => {
 
   const fetchUser = async (username: string) => {
     try {
-      const response = await fetch('http://localhost:4000/user', {
+      const response = await fetch('https://savvy-okto.onrender.com/user', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -164,7 +164,7 @@ const LoginPage = ({ setAuthToken, authToken, handleLogout }) => {
 
   const createUser = async (params: any) => {
     try {
-      const response = await fetch('http://localhost:4000/users', {
+      const response = await fetch('https://savvy-okto.onrender.com/users', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

@@ -1,5 +1,5 @@
 import { createPublicClient, createWalletClient, http } from "viem";
-import { polygonAmoy } from "viem/chains";
+import { polygonAmoy, polygon } from "viem/chains";
 import { privateKeyToAccount } from "viem/accounts";
 
 // Ensure this is securely set in your environment variables
