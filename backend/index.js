@@ -6,7 +6,7 @@ const prisma = new PrismaClient();
 const app = express();
 app.use(express.json());
 
-app.use(cors({ origin: 'https://savvy-okto.vercel.app' }))
+app.use(cors({ origin: 'https://2660-102-88-36-239.ngrok-free.app' }))
 
 
 app.post('/user', async (req, res) => {
