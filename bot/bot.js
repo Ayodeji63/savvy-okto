@@ -11,7 +11,7 @@ import { tokenAbi, tokenAddress } from './token.js';
 const bot = new Telegraf(process.env.TOKEN);
 
 const PORT = process.env.PORT || 8000;
-const miniApp = 'https://t.me/SavvyCBot/Savvy'
+const miniApp = 'https://t.me/SavvyCBot/circle'
 
 
 
