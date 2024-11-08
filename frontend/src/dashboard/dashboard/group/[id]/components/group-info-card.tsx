@@ -1,5 +1,5 @@
-import IconElement from "@/components/common/icon-element";
-import { type Icons } from "@/components/common/icons";
+import IconElement from "../../../../../components/common/icon-element";
+import { type Icons } from "../../../../../components/common/icons";
 
 type Props = {
   text: string;

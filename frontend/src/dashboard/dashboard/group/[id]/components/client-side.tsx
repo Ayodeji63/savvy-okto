@@ -1,8 +1,8 @@
 
-import PageWrapper from "@/components/common/page-wrapper";
+import PageWrapper from "../../../../../components/common/page-wrapper";
 // import { Button } from "@/components/ui/button";
-import { CardStack } from "@/components/ui/card-stack";
-import { Input } from "@/components/ui/input";
+import { CardStack } from "../../../../../components/ui/card-stack";
+import { Input } from "../../../../../components/ui/input";
 import {
   Sheet,
   SheetContent,
@@ -10,10 +10,9 @@ import {
   SheetHeader,
   SheetTitle,
   SheetTrigger,
-} from "@/components/ui/sheet";
-import { routes } from "@/lib/routes";
-import { amounts } from "@/lib/utils";
-import { useUiStore } from "@/store/useUiStore";
+} from "../../../../../components/ui/sheet";
+import { amounts } from "../../../../../lib/utils";
+import { useUiStore } from "../../../../../store/useUiStore";
 import { yupResolver } from "@hookform/resolvers/yup";
 import numeral from "numeral";
 import { useEffect, useState } from "react";
@@ -22,18 +21,15 @@ import { type InferType, number, object } from "yup";
 import GroupInfoCard from "./group-info-card";
 // import { useActiveAccount, useReadContract } from "thirdweb/react";
 // import { getContract, prepareContractCall, sendTransaction } from "thirdweb";
-import { TOKEN, TokenMap } from "@/lib/libs";
-import { contractAddress } from "@/contract";
-import { group } from "console";
-import { formatEther, parseEther } from "viem";
-import { Card, useAuthContext } from "@/context/AuthContext";
-import { tokenAddress, usdtAddress } from "@/token";
-import { notification } from "@/utils/notification";
-import { transactionSchema } from "@/types/utils";
+import { formatEther } from "viem";
+import { useAuthContext } from "../../../../../context/AuthContext";
+import { tokenAddress, usdtAddress } from "../../../../../token";
 import { Loader2 } from "lucide-react";
-import BackButton from "@/components/common/back-button";
-import FormErrorTextMessage from "@/components/common/form-error-text-message";
-import { Button } from "@/components/ui/button";
+import BackButton from "../../../../../components/common/back-button";
+import FormErrorTextMessage from "../../../../../components/common/form-error-text-message";
+import { Button } from "../../../../../components/ui/button";
+import { publicClient } from "../../../../../publicClient";
+import { abi, contractAddress } from "../../../../../contract";
 
 type Props = {
   id: string;
@@ -57,10 +53,13 @@ const GroupPageClientSide = ({ id }: any) => {
 
   const { CARDS, setCARDS, user, setTransactions } = useAuthContext();
   const [loanRepayment, setLoanRepayment] = useState<number>(0);
-  const [loanText, setLoanText] = useState("Repay Loan");
+  const [loanText, setLoanText] = useState<any>("Repay Loan");
   const [request, setRequest] = useState("Request Loan");
   const [isLoading, setIsLoading] = useState(false);
-  const [monthlySavings, setMonthlySavings] = useState("");
+  const [monthlySavings, setMonthlySavings] = useState<any>("");
+  const { baseAddress } = useAuthContext();
+  const [loanData, setLoanData] = useState<any>();
+  const [groupData, setGroupData] = useState<any>();
 
 
 
@@ -125,6 +124,26 @@ const GroupPageClientSide = ({ id }: any) => {
   const handleAmountInput = (value: number) => {
     setValue("amount", value);
   };
+
+  const handleLoanData = async () => {
+    const data = await publicClient.readContract({
+      address: contractAddress,
+      abi: abi || [],
+      functionName: "loanData",
+      args: [baseAddress, BigInt(id)]
+    })
+    setLoanData(data);
+  }
+
+  const handleGroupData = async () => {
+    const data = await publicClient.readContract({
+      address: contractAddress,
+      abi: abi ?? [],
+      functionName: "groupData",
+      args: [BigInt(id ?? 0)]
+    })
+    setGroupData(data);
+  }
 
   // useEffect(() => {
   //   console.log("useEffect triggered. groupData:", groupData);
@@ -300,8 +319,14 @@ const GroupPageClientSide = ({ id }: any) => {
   //   }
   // };
 
-  const groupData: [] = [];
-  const loanData: [] = [];
+
+
+  useEffect(() => {
+
+    handleLoanData();
+    handleGroupData();
+  }, [])
+
   return (
     <main className="">
       {groupData && (
@@ -369,7 +394,7 @@ const GroupPageClientSide = ({ id }: any) => {
                           <SheetTitle>Repay loan</SheetTitle>
                           <SheetDescription className="pb-32">
                             <form
-                              onSubmit={handleSubmit(onSubmit)}
+                              // onSubmit={handleSubmit()}
                               className="space-y-5"
                             >
                               <div>
@@ -447,7 +472,7 @@ const GroupPageClientSide = ({ id }: any) => {
               </div>
             </div>
 
-            {groupData[10] === account?.address &&
+            {groupData[10] === baseAddress &&
               Number(groupData[0]) === 0 && (
                 <div className="space-y-2">
                   <h1 className="text-base font-semibold leading-[18px] text-[#0A0F29]">
@@ -459,7 +484,7 @@ const GroupPageClientSide = ({ id }: any) => {
                     value={monthlySavings}
                     onChange={(e) => setMonthlySavings(e.target.value)}
                   />
-                  <Button className="bg-[#4A9F17]" onClick={maketx}>
+                  <Button className="bg-[#4A9F17]">
                     {" "}
                     {isLoading ? (
                       <Loader2 className="mr-2 h-4 w-4 animate-spin" />
