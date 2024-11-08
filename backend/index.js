@@ -6,7 +6,7 @@ const prisma = new PrismaClient();
 const app = express();
 app.use(express.json());
 
-app.use(cors({ origin: 'http://localhost:5173' }))
+app.use(cors({ origin: 'https://savvy-okto.onrender.com' }))
 
 app.post('/user', async (req, res) => {
     const { username } = req.body;
