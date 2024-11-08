@@ -19,10 +19,13 @@ import {
 import { Input } from "../../components/ui/input";
 import { Button } from "../../components/ui/button";
 import { useNavigate } from "react-router-dom";
-import { publicClient } from "../../publicClient";
+import { publicClient, walletClient } from "../../publicClient";
 import { abi, contractAddress } from "../../contract";
 import { RawTransactionStatusQuery, useOkto, type OktoContextType } from "okto-sdk-react";
-import { tokenAbi, tokenAddress } from "../../token";
+import { tokenAbi, tokenAddress, usdtAddress } from "../../token";
+import { notification } from "../../utils/notification";
+import { transactionSchema } from "../../types/utils";
+import { base } from "viem/chains";
 interface GroupProps {
   id: bigint;
   isHovered: boolean;
@@ -44,6 +47,7 @@ const GroupRadio: React.FC<GroupProps> = ({
   const { executeRawTransaction, getRawTransactionStatus } = useOkto() as OktoContextType;
   const { baseAddress } = useAuthContext();
   const navigate = useNavigate();
+  const [groupData, setGroupData] = useState<any>();
 
   const getGroupData = async () => {
     try {
@@ -60,19 +64,33 @@ const GroupRadio: React.FC<GroupProps> = ({
     }
   }
 
+
+
   const approve = async () => {
     try {
+      if (!groupInfo) {
+        notification.error("Group data not available");
+        return;
+      }
+      if (!groupInfo[14]) {
+        notification.error("An error occured, Try Again!")
+        return;
+      }
       setIsLoading(true);
+      setText("approving..")
+      const address = groupInfo[15];
+      console.log("Address is given as", address);
+
       const res = await executeRawTransaction({
-        network_name: "POLYGON_TESTNET_AMOY",
+        network_name: "BASE",
         transaction: {
           from: baseAddress,
-          to: tokenAddress,
+          to: address,
           value: "0x0",
           data: encodeFunctionData({
             abi: tokenAbi ?? [],
             functionName: 'approve',
-            args: [contractAddress, parseEther("1000")]
+            args: [contractAddress, parseEther(String(100_000_000))]
           })
         }
       })
@@ -80,16 +98,223 @@ const GroupRadio: React.FC<GroupProps> = ({
       const query: RawTransactionStatusQuery = {
         order_id: res?.jobId
       }
-      const status = await getRawTransactionStatus(query)
+      let status = await getRawTransactionStatus(query)
       console.log(status);
+      console.log("Total Length", status?.total);
+      console.log("Total jobs", status?.jobs[0]);
+      while (status?.jobs[0].status === "RUNNING" || status?.jobs[0].status === "PENDING") {
+        await new Promise(resolve => setTimeout(resolve, 5000)); // Wait for 5 seconds
+        status = await getRawTransactionStatus(query);
+        console.log(status?.jobs[0].status);
+      }
 
+      if (status?.jobs[0].status === "SUCCESS") {
+        console.log("Transaction successful!");
+        setText("Success!");
+        // Handle successful transaction
+      } else if (status?.jobs[0].status === "FAILED") {
+        console.error("Transaction failed:", status?.jobs[0].status);
+        setText("Failed!");
+
+        // Handle failed transaction
+      } else if (status?.jobs[0].status === "PUBLISHED") {
+        console.error("Transaction Published:", status?.jobs[0].status);
+        setText("Published");
+
+        // Handle failed transaction
+      }
+      else {
+        console.error("Unexpected transaction status:", status?.jobs[0].status);
+        // Handle unexpected status
+      }
+
+      const hash: string = String(status?.jobs[0].transaction_hash) ?? "";
+      console.log("Approved Hash %s", hash);
       setIsLoading(false);
+      return hash;
     } catch (error) {
       setIsLoading(false);
+      setText("Failed, Try Again!")
       console.log("An error occured ", error);
     }
   }
 
+  const deposit = async () => {
+    try {
+      if (!groupInfo) {
+        notification.error("Group data not available");
+        return;
+      }
+      if (!groupInfo[14]) {
+        notification.error("An error occured, Try Again!")
+        return;
+      }
+      setIsLoading(true);
+      setText("Depositing..")
+      const address = groupInfo[15];
+      console.log("Address is given as", address);
+      console.log("Id is %s", id);
+      console.log("Group Id is %s", groupId);
+
+
+      const res = await executeRawTransaction({
+        network_name: "BASE",
+        transaction: {
+          from: baseAddress,
+          to: contractAddress,
+          value: "0x0",
+          data: encodeFunctionData({
+            abi: abi ?? [],
+            functionName: 'deposit',
+            args: [groupId, baseAddress]
+          })
+        }
+      })
+      console.log(res);
+      const query: RawTransactionStatusQuery = {
+        order_id: res?.jobId
+      }
+      let status = await getRawTransactionStatus(query)
+      console.log(status);
+      console.log("Total Length", status?.total);
+      console.log("Total jobs", status?.jobs[0]);
+      while (status?.jobs[0].status === "RUNNING" || status?.jobs[0].status === "PENDING") {
+        await new Promise(resolve => setTimeout(resolve, 5000)); // Wait for 5 seconds
+        status = await getRawTransactionStatus(query);
+        console.log(status?.jobs[0].status);
+      }
+
+      if (status?.jobs[0].status === "SUCCESS") {
+        console.log("Transaction successful!");
+        setText("Success!");
+        // Handle successful transaction
+      } else if (status?.jobs[0].status === "FAILED") {
+        console.error("Transaction failed:", status?.jobs[0].status);
+        setText("Failed!");
+
+        // Handle failed transaction
+      } else if (status?.jobs[0].status === "PUBLISHED") {
+        console.error("Transaction Published:", status?.jobs[0].status);
+        setText("Published");
+
+        // Handle failed transaction
+      } else if (status?.jobs[0].status === "WAITING_FOR_SIGNATURE") {
+        console.error("Transaction WAITING_FOR_SIGNATURE:", status?.jobs[0].status);
+        setText("WAITING_FOR_SIGNATURE");
+
+        // Handle failed transaction
+      }
+      else {
+        console.error("Unexpected transaction status:", status?.jobs[0].status);
+        // Handle unexpected status
+      }
+
+      const hash: string = String(status?.jobs[0].transaction_hash) ?? "";
+      console.log("Deposit Hash %s", hash);
+
+      setIsLoading(false);
+      return hash;
+    } catch (error) {
+      setIsLoading(false);
+      setText("Failed, Try Again!")
+      console.log("An error occured ", error);
+    }
+  }
+
+  // const deposit = async () => {
+  //   try {
+  //     setIsLoading(true);
+  //     setText("Depositing....")
+  //     const gasPrice = await publicClient.getGasPrice();
+  //     const gasPriceWithPremium = gasPrice * 120n / 100n; // 20% premium
+
+  //     const { request } = await publicClient.simulateContract({
+  //       address: contractAddress,
+  //       abi: abi,
+  //       functionName: 'deposit',
+  //       args: [groupId, baseAddress],
+  //       account: walletClient.account,
+  //       gas: await publicClient.estimateContractGas({
+  //         address: contractAddress,
+  //         abi: abi,
+  //         functionName: 'deposit',
+  //         args: [groupId, baseAddress],
+  //         account: walletClient.account
+  //       }),
+  //       maxFeePerGas: gasPriceWithPremium,
+  //       maxPriorityFeePerGas: gasPriceWithPremium / 2n
+  //     });
+
+  //     const hash = await walletClient.writeContract(request);
+  //     console.log(`Deposit Transaction hash:`, hash);
+  //     setIsLoading(false);
+  //   } catch (error) {
+  //       console.error(error);
+  //       setIsLoading(false);
+  //   }
+  // }
+  const makeDeposit = async () => {
+    try {
+      setIsLoading(true);
+      await approve();
+      await new Promise((resolve) => setTimeout(resolve, 3000));
+      const hash = await deposit();
+      if (String(hash) !== "") {
+        try {
+          const transactionParams: transactionSchema = {
+            fromAddress: String(baseAddress),
+            toAddress: groupInfo[9],
+            amount: String(depositAmount),
+            type: "Deposit",
+            transactionHash: String(hash),
+            status: "success",
+          }
+
+          const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/create`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ transactionParams }),
+          });
+
+          if (response.ok) {
+            const user = await response.json();
+            console.log(user);
+            return user;
+          } else {
+            console.error('Failed to fetch user');
+          }
+          const response2 = await fetch(`${import.meta.env.VITE_API_BASE_URL}/fetch`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ transactionParams }),
+          });
+
+          if (response.ok) {
+            const res = await response.json();
+            console.log(res);
+            setTransactions(res);
+
+          } else {
+            console.error('Failed to fetch user');
+          }
+        } catch (error) {
+          console.error("An error occured", error);
+          setIsLoading(false);
+
+        }
+      }
+
+      notification.success("Transaction Successful");
+      setIsLoading(false);
+
+    } catch (error) {
+
+    }
+  }
 
 
   function formatViemBalance(balance: bigint): string {
@@ -115,7 +340,11 @@ const GroupRadio: React.FC<GroupProps> = ({
 
   useEffect(() => {
     getGroupData();
+
   }, [])
+
+
+
 
 
   return (
@@ -192,7 +421,7 @@ const GroupRadio: React.FC<GroupProps> = ({
                     <div className="flex items-center justify-center gap-x-5"></div>
                     <Button
                       className="flex text-white bg-[#4A9F17]"
-                      onClick={() => approve()}
+                      onClick={() => deposit()}
                     >
                       {isLoading && (
                         <Loader2 className="mr-2 h-4 w-4 animate-spin" />

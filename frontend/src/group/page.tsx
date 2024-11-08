@@ -1,6 +1,7 @@
 import GroupPageClientSide from "./components/client-side";
-
-const GroupPage = ({ params: { id } }: { params: { id: string } }) => {
+import { useParams } from "react-router-dom";
+const GroupPage = () => {
+  const { id } = useParams();
   return (
     <>
       <GroupPageClientSide {...{ id }} />

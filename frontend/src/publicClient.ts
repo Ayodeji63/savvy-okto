@@ -1,5 +1,5 @@
 import { createPublicClient, createWalletClient, http } from "viem";
-import { polygonAmoy, polygon } from "viem/chains";
+import { polygonAmoy, polygon, base } from "viem/chains";
 import { privateKeyToAccount } from "viem/accounts";
 
 // Ensure this is securely set in your environment variables
@@ -10,7 +10,7 @@ if (!privateKey) {
 }
 
 export const publicClient = createPublicClient({
-    chain: polygonAmoy,
+    chain: base,
     transport: http()
 });
 
@@ -18,7 +18,7 @@ export const account = privateKeyToAccount(privateKey);
 
 export const walletClient = createWalletClient({
     account,
-    chain: polygonAmoy,
+    chain: base,
     transport: http()
 });
 

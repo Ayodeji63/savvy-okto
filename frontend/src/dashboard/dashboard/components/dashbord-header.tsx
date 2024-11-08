@@ -140,7 +140,7 @@ const DashboardHeader = () => {
 
   const usdtBalance = async () => {
     const data = await publicClient.readContract({
-      address: tokenAddress,
+      address: usdtAddress,
       abi: tokenAbi,
       functionName: 'balanceOf',
       args: [baseAddress]

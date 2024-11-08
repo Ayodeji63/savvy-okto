@@ -1,4 +1,4 @@
-export const tokenAddress = "0xD0a2398e4397443FBde633f1672555b5887AbC20";
+export const tokenAddress = "0x14945a6C38DA058737871514e762223a582773C9";
 export const tokenAbi = [
   {
     type: "constructor",
@@ -255,4 +255,4 @@ export const tokenAbi = [
   },
 ];
 
-export const usdtAddress = "0x27d583171526B5a34045989a7fe37bAA4aDE944e"
+export const usdtAddress = "0xdEa8A9dd565dBdaD84D695C723CE76B0B742D24B"

@@ -137,16 +137,15 @@ const LoginPage = ({ setAuthToken, authToken, handleLogout }) => {
     }
     // router.push("/dashboard");
   };
-
   const fetchUser = async (username: string) => {
     try {
-      const response = await fetch('https://savvy-okto.vercel.app/user', {
+      const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/user`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ username })
-      })
+        body: JSON.stringify({ username }),
+      });
 
       if (response.ok) {
         const user = await response.json();
@@ -154,35 +153,33 @@ const LoginPage = ({ setAuthToken, authToken, handleLogout }) => {
         return user;
       } else {
         console.error('Failed to fetch user');
-
       }
     } catch (error) {
       console.error('Error:', error);
-
     }
-  }
+  };
 
   const createUser = async (params: any) => {
     try {
-      const response = await fetch('https://savvy-okto.vercel.app/users', {
+      const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/users`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({ params }),
-      })
+      });
 
       if (response.ok) {
-        const newUSer = await response.json();
-        console.log(newUSer);
-        return newUSer;
+        const newUser = await response.json();
+        console.log(newUser);
+        return newUser;
       } else {
         console.error('Failed to create user');
       }
     } catch (e) {
       console.error('Error:', e);
     }
-  }
+  };
 
   useEffect(() => {
     fetchWallets();

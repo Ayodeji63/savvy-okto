@@ -1,8 +1,8 @@
 
-import PageWrapper from "../../../../../components/common/page-wrapper";
+import PageWrapper from "../../components/common/page-wrapper";
 // import { Button } from "@/components/ui/button";
-import { CardStack } from "../../../../../components/ui/card-stack";
-import { Input } from "../../../../../components/ui/input";
+import { CardStack } from "../../components/ui/card-stack";
+import { Input } from "../../components/ui/input";
 import {
   Sheet,
   SheetContent,
@@ -10,9 +10,9 @@ import {
   SheetHeader,
   SheetTitle,
   SheetTrigger,
-} from "../../../../../components/ui/sheet";
-import { amounts } from "../../../../../lib/utils";
-import { useUiStore } from "../../../../../store/useUiStore";
+} from "../../components/ui/sheet";
+import { amounts } from "../../lib/utils";
+import { useUiStore } from "../../store/useUiStore";
 import { yupResolver } from "@hookform/resolvers/yup";
 import numeral from "numeral";
 import { useEffect, useState } from "react";
@@ -21,15 +21,19 @@ import { type InferType, number, object } from "yup";
 import GroupInfoCard from "./group-info-card";
 // import { useActiveAccount, useReadContract } from "thirdweb/react";
 // import { getContract, prepareContractCall, sendTransaction } from "thirdweb";
-import { formatEther } from "viem";
-import { useAuthContext } from "../../../../../context/AuthContext";
-import { tokenAddress, usdtAddress } from "../../../../../token";
+import { encodeFunctionData, formatEther, parseEther } from "viem";
+import { Card, useAuthContext } from "../../context/AuthContext";
+import { tokenAbi, tokenAddress, usdtAddress } from "../../token";
 import { Loader2 } from "lucide-react";
-import BackButton from "../../../../../components/common/back-button";
-import FormErrorTextMessage from "../../../../../components/common/form-error-text-message";
-import { Button } from "../../../../../components/ui/button";
-import { publicClient } from "../../../../../publicClient";
-import { abi, contractAddress } from "../../../../../contract";
+import BackButton from "../../components/common/back-button";
+import FormErrorTextMessage from "../../components/common/form-error-text-message";
+import { Button } from "../../components/ui/button";
+import { publicClient } from "../../publicClient";
+import { abi, contractAddress } from "../../contract";
+import { TOKEN } from "../../lib/libs";
+import { routes } from "../../lib/routes";
+import { notification } from "../../utils/notification";
+import { RawTransactionStatusQuery, useOkto } from "okto-sdk-react";
 
 type Props = {
   id: string;
@@ -53,43 +57,46 @@ const GroupPageClientSide = ({ id }: any) => {
 
   const { CARDS, setCARDS, user, setTransactions } = useAuthContext();
   const [loanRepayment, setLoanRepayment] = useState<number>(0);
-  const [loanText, setLoanText] = useState<any>("Repay Loan");
   const [request, setRequest] = useState("Request Loan");
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
   const [monthlySavings, setMonthlySavings] = useState<any>("");
   const { baseAddress } = useAuthContext();
   const [loanData, setLoanData] = useState<any>();
   const [groupData, setGroupData] = useState<any>();
+  const [text, setText] = useState("Repay Loan");
+  const [amt, setAmt] = useState<any>();
+  const { executeRawTransaction, getRawTransactionStatus } = useOkto();
+
 
 
 
   const isValidTokenKey = (key: string) => {
     return key === tokenAddress || key === usdtAddress;
   }
-  // const symbol = () => {
-  //   if (!groupData) {
-  //     return;
-  //   }
+  const symbol = () => {
+    if (!groupData) {
+      return;
+    }
 
-  //   const tokenKey = groupData[15];
-  //   if (typeof tokenKey === 'string' && isValidTokenKey(tokenKey)) {
-  //     if (tokenKey === tokenAddress) {
-  //       console.log(TOKEN.tokenAddress.symbol)
-  //       return TOKEN.tokenAddress.symbol;
-  //     } else if (tokenKey === usdtAddress) {
-  //       console.log(TOKEN.usdtAddress.symbol);
+    const tokenKey = groupData[15];
+    if (typeof tokenKey === 'string' && isValidTokenKey(tokenKey)) {
+      if (tokenKey === tokenAddress) {
+        console.log(TOKEN.tokenAddress.symbol)
+        return TOKEN.tokenAddress.symbol;
+      } else if (tokenKey === usdtAddress) {
+        console.log(TOKEN.usdtAddress.symbol);
 
-  //       return TOKEN.usdtAddress.symbol;
-  //     } else {
-  //       // Handle the case where groupData[15] is not a valid key
-  //       return '';
-  //     }
+        return TOKEN.usdtAddress.symbol;
+      } else {
+        // Handle the case where groupData[15] is not a valid key
+        return '';
+      }
 
-  //     // return TOKEN[tokenKey].symbol
-  //   }
-  // }
+      // return TOKEN[tokenKey].symbol
+    }
+  }
 
-  const sym = "NGN" // symbol();
+  const sym = symbol();
 
 
   const {
@@ -129,9 +136,10 @@ const GroupPageClientSide = ({ id }: any) => {
     const data = await publicClient.readContract({
       address: contractAddress,
       abi: abi || [],
-      functionName: "loanData",
+      functionName: "loans",
       args: [baseAddress, BigInt(id)]
     })
+    console.log("Group loans", data);
     setLoanData(data);
   }
 
@@ -139,69 +147,219 @@ const GroupPageClientSide = ({ id }: any) => {
     const data = await publicClient.readContract({
       address: contractAddress,
       abi: abi ?? [],
-      functionName: "groupData",
+      functionName: "groups",
       args: [BigInt(id ?? 0)]
     })
+    console.log("Group Data", data);
     setGroupData(data);
   }
 
-  // useEffect(() => {
-  //   console.log("useEffect triggered. groupData:", groupData);
-  //   if (groupData) {
-  //     setCARDS((prevCards: Card[]): Card[] => {
-  //       return prevCards.map((card) => {
-  //         switch (card.id) {
-  //           case 0:
-  //             return {
-  //               ...card,
-  //               value: `${sym}${String(formatViemBalance(groupData[1]))}`,
-  //             };
-  //           case 1:
-  //             return { ...card, value: String(groupData[11]) };
-  //           case 2:
-  //             return {
-  //               ...card,
-  //               value: `${sym}${String(formatViemBalance(groupData[2]))}`,
-  //             };
-  //           default:
-  //             return card;
-  //         }
-  //       });
-  //     });
-  //   } else {
-  //     console.log("groupData is null or undefined");
-  //   }
-  // }, [groupData]);
+  useEffect(() => {
+    console.log("useEffect triggered. groupData:", groupData);
+    if (groupData) {
+      setCARDS((prevCards: Card[]): Card[] => {
+        return prevCards.map((card) => {
+          switch (card.id) {
+            case 0:
+              return {
+                ...card,
+                value: `${sym}${String(formatViemBalance(groupData[1]))}`,
+              };
+            case 1:
+              return { ...card, value: String(groupData[11]) };
+            case 2:
+              return {
+                ...card,
+                value: `${sym}${String(formatViemBalance(groupData[2]))}`,
+              };
+            default:
+              return card;
+          }
+        });
+      });
+    } else {
+      console.log("groupData is null or undefined");
+    }
+  }, [groupData]);
 
-  // useEffect(() => {
-  //   console.log("CARDS state updated:", CARDS);
-  // }, [CARDS]);
+  useEffect(() => {
+    console.log("CARDS state updated:", CARDS);
+  }, [CARDS]);
 
-  // useEffect(() => {
-  //   setPage({ previousRouter: routes.dashboard });
-  //   // eslint-disable-next-line @typescript-eslint/no-floating-promises
-  //   useUiStore.persist.rehydrate();
-  //   refetchGroupData();
+  useEffect(() => {
+    setPage({ previousRouter: routes.dashboard });
+    // eslint-disable-next-line @typescript-eslint/no-floating-promises
+    useUiStore.persist.rehydrate();
+    // refetchGroupData();
 
-  //   // eslint-disable-next-line react-hooks/exhaustive-deps
-  // }, []);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const approve = async (amount: number) => {
+    try {
+      setIsLoading(true);
+      setText("approving..")
+      if (!groupData) {
+        notification.error("Group data not available");
+        return;
+      }
+
+      if (!groupData[15]) {
+        notification.error("An error occured, Try Again!")
+        return;
+      }
+      if (!amount) {
+        notification.error("Please enter deposit amount");
+        return;
+      }
+      const address = groupData[15];
+      console.log("Address is given as", address);
+
+      const res = await executeRawTransaction({
+        network_name: "BASE",
+        transaction: {
+          from: baseAddress,
+          to: address,
+          value: "0x0",
+          data: encodeFunctionData({
+            abi: tokenAbi ?? [],
+            functionName: 'approve',
+            args: [contractAddress, parseEther(String(100_000_000))]
+          })
+        }
+      })
+      console.log(res);
+      const query: RawTransactionStatusQuery = {
+        order_id: res?.jobId
+      }
+      let status = await getRawTransactionStatus(query)
+      console.log(status);
+      console.log("Total Length", status?.total);
+      console.log("Total jobs", status?.jobs[0]);
+      while (status?.jobs[0].status === "RUNNING" || status?.jobs[0].status === "PENDING") {
+        await new Promise(resolve => setTimeout(resolve, 5000)); // Wait for 5 seconds
+        status = await getRawTransactionStatus(query);
+        console.log(status?.jobs[0].status);
+      }
+
+      if (status?.jobs[0].status === "SUCCESS") {
+        console.log("Transaction successful!");
+        setText("Success!");
+        // Handle successful transaction
+      } else if (status?.jobs[0].status === "FAILED") {
+        console.error("Transaction failed:", status?.jobs[0].status);
+        setText("Failed!");
+
+        // Handle failed transaction
+      } else if (status?.jobs[0].status === "PUBLISHED") {
+        console.error("Transaction Published:", status?.jobs[0].status);
+        setText("Published");
+
+        // Handle failed transaction
+      }
+      else {
+        console.error("Unexpected transaction status:", status?.jobs[0].status);
+        // Handle unexpected status
+      }
+
+      const hash: string = String(status?.jobs[0].transaction_hash) ?? "";
+      console.log("Approved Hash %s", hash);
+      setIsLoading(false);
+      return hash;
+    } catch (error) {
+      setIsLoading(false);
+      setText("Failed, Try Again!")
+      console.log("An error occured ", error);
+    }
+  }
+
+
+  const repayLoan = async (amount: number) => {
+    try {
+      if (!id) return;
+
+      setIsLoading(true);
+      console.log("Base address is given as", baseAddress);
+      const res = await executeRawTransaction({
+        network_name: "BASE",
+        transaction: {
+          from: baseAddress,
+          to: contractAddress,
+          value: "0x0",
+          data: encodeFunctionData({
+            abi: abi ?? [],
+            functionName: 'repayLoan',
+            args: [id, parseEther(String(amount)), baseAddress]
+          })
+        }
+      })
+      console.log(res);
+      const query: RawTransactionStatusQuery = {
+        order_id: res?.jobId
+      }
+      let status = await getRawTransactionStatus(query)
+      console.log(status);
+      console.log("Total Length", status?.total);
+      console.log("Total jobs", status?.jobs[0]);
+      while (status?.jobs[0].status === "RUNNING" || status?.jobs[0].status === "PENDING") {
+        await new Promise(resolve => setTimeout(resolve, 5000)); // Wait for 5 seconds
+        status = await getRawTransactionStatus(query);
+        console.log(status?.jobs[0].status);
+      }
+
+      if (status?.jobs[0].status === "SUCCESS") {
+        console.log("Transaction successful!");
+        setText("Success!");
+        // Handle successful transaction
+      } else if (status?.jobs[0].status === "FAILED") {
+        console.error("Transaction failed:", status?.jobs[0].status);
+        setText("Failed!");
+
+        // Handle failed transaction
+      } else if (status?.jobs[0].status === "PUBLISHED") {
+        console.error("Transaction Published:", status?.jobs[0].status);
+        setText("Published");
+
+        // Handle failed transaction
+      } else if (status?.jobs[0].status === "WAITING_FOR_SIGNATURE") {
+        console.error("Transaction WAITING_FOR_SIGNATURE:", status?.jobs[0].status);
+        setText("WAITING_FOR_SIGNATURE");
+
+        // Handle failed transaction
+      }
+      else {
+        console.error("Unexpected transaction status:", status?.jobs[0].status);
+        // Handle unexpected status
+      }
+
+      const hash: string = String(status?.jobs[0].transaction_hash) ?? "";
+      console.log("Deposit Hash %s", hash);
+
+      setIsLoading(false);
+      return hash;
+    } catch (error) {
+      setIsLoading(false);
+      setText("Failed, Try Again!")
+      console.log("An error occured ", error);
+    }
+  }
 
   // const approve = async (amount: number) => {
   //   try {
   //     // Check if groupData exists and has the expected property
-  //     if (!groupData) {
-  //       notification.error("Group data not available");
-  //       return;
-  //     }
+  // if (!groupData) {
+  //   notification.error("Group data not available");
+  //   return;
+  // }
 
-  //     if (!groupData[15]) {
-  //       notification.error("An error occured, Try Again!")
-  //       return;
-  //     }
-  //     if (!amount) {
-  //       notification.error("Please enter deposit amount");
-  //       return;
-  //     }
+  // if (!groupData[15]) {
+  //   notification.error("An error occured, Try Again!")
+  //   return;
+  // }
+  // if (!amount) {
+  //   notification.error("Please enter deposit amount");
+  //   return;
+  // }
 
   //     const address = groupData[15];
 
@@ -288,36 +446,40 @@ const GroupPageClientSide = ({ id }: any) => {
   //   }
   // };
 
-  // const onSubmit = async (data: FormData) => {
-  //   try {
-  //     console.log(data);
-  //     setIsLoading(true);
-  //     await approve(data.amount);
-  //     await new Promise((resolve) => setTimeout(resolve, 10000));
-  //     const hash = await repayLoan(data.amount);
+  const onSubmit = async (e: any) => {
+    try {
+      e.preventDefault();
+      setIsLoading(true);
+      console.log("Amt is ", amt);
+      if (!amt) {
+        return;
+      }
+      await approve(amt);
+      await new Promise((resolve) => setTimeout(resolve, 3000));
+      await repayLoan(amt);
 
-  //     if (hash) {
-  //       setIsLoading(false);
-  //       const params: transactionSchema = {
-  //         fromAddress: String(user?.username),
-  //         toAddress: groupData ? groupData[9] : "Group",
-  //         amount: String(data.amount),
-  //         type: "Deposit",
-  //         transactionHash: String(hash),
-  //         status: "success",
-  //       };
-  //       await createTransaction(params);
-  //       const tx = await findUserTransactions(user?.username ?? "");
-  //       setTransactions(tx);
-  //     }
-  //     notification.success("Transaction Successful!");
-  //     setIsLoading(false);
-  //     refetchLoanData();
-  //   } catch (e) {
-  //     setIsLoading(false);
-  //     notification.error("An error occured");
-  //   }
-  // };
+      // if (hash) {
+      //   setIsLoading(false);
+      //   const params: transactionSchema = {
+      //     fromAddress: String(user?.username),
+      //     toAddress: groupData ? groupData[9] : "Group",
+      //     amount: String(data.amount),
+      //     type: "Deposit",
+      //     transactionHash: String(hash),
+      //     status: "success",
+      //   };
+      //   await createTransaction(params);
+      //   const tx = await findUserTransactions(user?.username ?? "");
+      //   setTransactions(tx);
+      // }
+      // notification.success("Transaction Successful!");
+      // setIsLoading(false);
+      // refetchLoanData();
+    } catch (e) {
+      setIsLoading(false);
+      notification.error("An error occured");
+    }
+  };
 
 
 
@@ -328,7 +490,7 @@ const GroupPageClientSide = ({ id }: any) => {
   }, [])
 
   return (
-    <main className="">
+    <main className="p-4">
       {groupData && (
         <div className="flex items-center bg-green-900 p-4 text-white shadow-lg">
           {/* <ArrowLeft className="mr-2" /> */}
@@ -394,15 +556,14 @@ const GroupPageClientSide = ({ id }: any) => {
                           <SheetTitle>Repay loan</SheetTitle>
                           <SheetDescription className="pb-32">
                             <form
-                              // onSubmit={handleSubmit()}
                               className="space-y-5"
                             >
                               <div>
                                 <Input
                                   placeholder="Enter the amount you want to repay"
                                   className="tect-base font-medium text-[#696F8C] placeholder:text-[#696F8C]"
-                                  value={loanRepayment}
-                                  {...register("amount")}
+                                  value={amt}
+                                  onChange={(e) => setAmt(e.target.value)}
                                 />
                                 <FormErrorTextMessage errors={errors.amount} />
                               </div>
@@ -418,12 +579,12 @@ const GroupPageClientSide = ({ id }: any) => {
                                   </Button>
                                 ))}
                               </div>
-                              <Button className="bg-[#4A9F17]">
+                              <Button className="bg-[#4A9F17] flex" onClick={onSubmit}>
                                 {" "}
                                 {isLoading && (
                                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                                 )}
-                                {!isLoading && loanText}
+                                {text}
                               </Button>
                             </form>
 

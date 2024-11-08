@@ -157,7 +157,7 @@ Amount: <b>${formattedAmount} ${sym}</b>
 Great job on contributing to your savings goal! 🎉
         `;
             const keyboard = Markup.inlineKeyboard([
-                [Markup.button.url('🔍 View Transaction', `https://sepolia-blockscout.lisk.com/tx/${transactionHash}`), Markup.button.url('🏦 Open SavvyCircle', 'https://t.me/SavvyLiskBot/savvyLisk')],
+                [Markup.button.url('🔍 View Transaction', `https://base.blockscout.com/tx/${transactionHash}`), Markup.button.url('🏦 Open SavvyCircle', 'https://t.me/SavvyLiskBot/savvyLisk')],
 
             ]);
 
@@ -205,7 +205,7 @@ Great job on repaying back your loan! 🎉
         `;
 
             const keyboard = Markup.inlineKeyboard([
-                [Markup.button.url('🔍 View Transaction', `https://sepolia-blockscout.lisk.com/tx/${transactionHash}`), Markup.button.url('🏦 Open SavvyCircle', 'https://t.me/SavvyLiskBot/savvyLisk')],
+                [Markup.button.url('🔍 View Transaction', `https://base.blockscout.com/tx/${transactionHash}`), Markup.button.url('🏦 Open SavvyCircle', 'https://t.me/SavvyLiskBot/savvyLisk')],
 
             ]);
 
@@ -251,7 +251,7 @@ async function handleLoanDistributedEvent(logs) {
             `;
 
             const keyboard = Markup.inlineKeyboard([
-                [Markup.button.url('🔍 View Transaction', `https://sepolia-blockscout.lisk.com/tx/${transactionHash}`), Markup.button.url('🏦 Open SavvyCircle', 'https://t.me/SavvyLiskBot/savvyLisk')],
+                [Markup.button.url('🔍 View Transaction', `https://base.blockscout.com/tx/${transactionHash}`), Markup.button.url('🏦 Open SavvyCircle', 'https://t.me/SavvyLiskBot/savvyLisk')],
 
             ]);
 
@@ -446,7 +446,7 @@ async function handleCreateGroup(ctx) {
             Markup.inlineKeyboard([
                 [
                     Markup.button.url('🏦 Open SavvyCircle', 'https://t.me/SavvyLiskBot/savvyLisk'),
-                    Markup.button.url('🔍 View Transaction', `https://sepolia-blockscout.lisk.com/tx/${hash}`)
+                    Markup.button.url('🔍 View Transaction', `https://base.blockscout.com/tx/${hash}`)
                 ]
             ])
         );
@@ -706,7 +706,7 @@ const handleTokenSelection = async (ctx, tokenType) => {
         const inlineKeyboard = Markup.inlineKeyboard([
             [
                 Markup.button.url('🏦 Open SavvyCircle', 'https://t.me/SavvyLiskBot/savvyLisk'),
-                Markup.button.url('🔍 View Transaction', `https://sepolia-blockscout.lisk.com/tx/${txHash}`)
+                Markup.button.url('🔍 View Transaction', `https://base.blockscout.com/tx/${txHash}`)
             ]
         ]);
 
@@ -969,7 +969,7 @@ async function handleJoinGroup(ctx) {
             Markup.inlineKeyboard([
                 [
                     Markup.button.url('🏦 Open SavvyCircle', 'https://t.me/SavvyLiskBot/savvyLisk'),
-                    Markup.button.url('🔍 View Transaction', `https://sepolia-blockscout.lisk.com/tx/${hash}`)
+                    Markup.button.url('🔍 View Transaction', `https://base.blockscout.com/tx/${hash}`)
                 ]
             ])
         );
