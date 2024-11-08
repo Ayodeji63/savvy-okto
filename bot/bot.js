@@ -11,6 +11,7 @@ import { tokenAbi, tokenAddress } from './token.js';
 const bot = new Telegraf(process.env.TOKEN);
 
 const PORT = process.env.PORT || 8000;
+const miniApp = 'https://t.me/SavvyCBot/Savvy'
 
 
 
@@ -41,7 +42,7 @@ bot.on('new_chat_members', async (ctx) => {
         ctx.reply(welcomeMessage, {
             parse_mode: 'HTML',
             ...Markup.inlineKeyboard([
-                [Markup.button.url('Open SavvyCircle', 'https://t.me/SavvyCBot/Savvy')]
+                [Markup.button.url('Open SavvyCircle', miniApp)]
             ])
         });
     }
@@ -102,7 +103,7 @@ Great job on contributing to your savings goal! 🎉
         `;
             const keyboard = Markup.inlineKeyboard([
                 [Markup.button.url('View Transaction', `https://sepolia.basescan.org/tx/${transactionHash}`)],
-                [Markup.button.url('Open SavvyCircle', 'https://t.me/SavvyCBot/Savvy')]
+                [Markup.button.url('Open SavvyCircle', miniApp)]
             ]);
 
             await bot.telegram.sendMessage(chatId, message, { parse_mode: 'HTML', ...keyboard });
@@ -134,7 +135,7 @@ Great job on repaying back your loan! 🎉
 
             const keyboard = Markup.inlineKeyboard([
                 [Markup.button.url('View Transaction', `https://sepolia.basescan.org/tx/${transactionHash}`)],
-                [Markup.button.url('Open SavvyCircle', 'https://t.me/SavvyCBot/Savvy')]
+                [Markup.button.url('Open SavvyCircle', miniApp)]
             ]);
 
             await bot.telegram.sendMessage(chatId, message, { parse_mode: 'HTML', ...keyboard });
@@ -165,7 +166,7 @@ async function handleLoanDistributedEvent(logs) {
 
             const keyboard = Markup.inlineKeyboard([
                 [Markup.button.url('View Transaction', `https://sepolia.basescan.org/tx/${transactionHash}`)],
-                [Markup.button.url('Open SavvyCircle', 'https://t.me/SavvyCBot/Savvy')]
+                [Markup.button.url('Open SavvyCircle', miniApp)]
             ]);
 
             await bot.telegram.sendMessage(chatId, message, { parse_mode: 'HTML', ...keyboard });
@@ -180,7 +181,7 @@ async function handleLoanDistributedEvent(logs) {
 function handleSavvyCommand(ctx) {
     return ctx.reply('Ready to get savvy with your finances? Click below to open SavvyCircle:',
         Markup.inlineKeyboard([
-            [Markup.button.url('Open SavvyCircle', 'https://t.me/SavvyCBot/Savvy')]
+            [Markup.button.url('Open SavvyCircle', miniApp)]
         ])
     );
 }
@@ -222,7 +223,7 @@ Keep growing together! 🌱💰
         `;
 
         const keyboard = Markup.inlineKeyboard([
-            [Markup.button.url('View Details in SavvyCircle', 'https://t.me/SavvyCBot/Savvy')]
+            [Markup.button.url('View Details in SavvyCircle', miniApp)]
         ]);
 
         await ctx.reply(message, { parse_mode: 'HTML', ...keyboard });
@@ -268,7 +269,7 @@ async function handleCreateGroup(ctx) {
         console.log(`Transaction receipt:`, hash);
         if (hash) {
             return ctx.reply(`Group "${groupName}" created successfully!. Open the app to set monthly contribution`, Markup.inlineKeyboard([
-                [Markup.button.url('Open SavvyCircle', 'https://t.me/SavvyCBot/Savvy')]
+                [Markup.button.url('Open SavvyCircle', miniApp)]
             ]));
         }
     } catch (error) {
@@ -316,7 +317,7 @@ Keep up the great work! 🎉
         `;
 
         const keyboard = Markup.inlineKeyboard([
-            [Markup.button.url('View Details in SavvyCircle', 'https://t.me/SavvyCBot/Savvy')]
+            [Markup.button.url('View Details in SavvyCircle', miniApp)]
         ]);
 
         await ctx.reply(message, { parse_mode: 'HTML', ...keyboard });
@@ -358,7 +359,7 @@ async function handleJoinGroup(ctx) {
 
         if (data.includes(BigInt(chatId))) {
             return ctx.reply(`${name}, you're already a member of this group. No need to join again! Check your app for more details`, Markup.inlineKeyboard([
-                [Markup.button.url('Open SavvyCircle', 'https://t.me/SavvyCBot/Savvy')]
+                [Markup.button.url('Open SavvyCircle', miniApp)]
             ]));
         }
 
@@ -384,7 +385,7 @@ async function handleJoinGroup(ctx) {
             const receipt = await publicClient.waitForTransactionReceipt({ hash });
 
             return ctx.reply(`Welcome ${name}! You've successfully joined "${groupName}"`, Markup.inlineKeyboard([
-                [Markup.button.url('Open SavvyCircle', 'https://t.me/SavvyCBot/Savvy')]
+                [Markup.button.url('Open SavvyCircle', miniApp)]
             ]))
         }, 3000);
 
