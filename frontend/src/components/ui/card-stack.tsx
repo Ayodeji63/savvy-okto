@@ -2,8 +2,8 @@
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { Icons } from "../common/icons";
-import { cn } from "@/lib/utils";
-import { useAuthContext } from "@/context/AuthContext";
+import { cn } from "../../lib/utils";
+import { useAuthContext } from "../../context/AuthContext";
 
 let interval: unknown;
 
