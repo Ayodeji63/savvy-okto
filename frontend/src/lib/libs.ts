@@ -1,6 +1,5 @@
 // useFetchGroups.ts
 
-import { tokenAddress, usdtAddress } from "@/token";
 import { formatEther } from "viem";
 import { symbol } from "zod";
 
