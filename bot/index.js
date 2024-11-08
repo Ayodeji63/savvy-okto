@@ -50,7 +50,7 @@ bot.on('new_chat_members', async (ctx) => {
         ctx.reply(welcomeMessage, {
             parse_mode: 'HTML',
             ...Markup.inlineKeyboard([
-                [Markup.button.url('🏦 Open SavvyCircle', 'https://t.me/SavvyLiskBot/savvyLisk')]
+                [Markup.button.url('🏦 Open SavvyCircle', 'https://t.me/SavvyCBot/circle')]
             ])
         });
     }
@@ -81,7 +81,7 @@ bot.command('help', async (ctx) => {
         ctx.reply(welcomeMessage, {
             parse_mode: 'HTML',
             ...Markup.inlineKeyboard([
-                [Markup.button.url('🏦 Open SavvyCircle', 'https://t.me/SavvyLiskBot/savvyLisk')]
+                [Markup.button.url('🏦 Open SavvyCircle', 'https://t.me/SavvyCBot/circle')]
             ])
         });
     }
@@ -157,7 +157,7 @@ Amount: <b>${formattedAmount} ${sym}</b>
 Great job on contributing to your savings goal! 🎉
         `;
             const keyboard = Markup.inlineKeyboard([
-                [Markup.button.url('🔍 View Transaction', `https://base.blockscout.com/tx/${transactionHash}`), Markup.button.url('🏦 Open SavvyCircle', 'https://t.me/SavvyLiskBot/savvyLisk')],
+                [Markup.button.url('🔍 View Transaction', `https://sepolia.basescan.org/tx/${transactionHash}`), Markup.button.url('🏦 Open SavvyCircle', 'https://t.me/SavvyCBot/circle')],
 
             ]);
 
@@ -205,7 +205,7 @@ Great job on repaying back your loan! 🎉
         `;
 
             const keyboard = Markup.inlineKeyboard([
-                [Markup.button.url('🔍 View Transaction', `https://base.blockscout.com/tx/${transactionHash}`), Markup.button.url('🏦 Open SavvyCircle', 'https://t.me/SavvyLiskBot/savvyLisk')],
+                [Markup.button.url('🔍 View Transaction', `https://sepolia.basescan.org/tx/${transactionHash}`), Markup.button.url('🏦 Open SavvyCircle', 'https://t.me/SavvyCBot/circle')],
 
             ]);
 
@@ -251,7 +251,7 @@ async function handleLoanDistributedEvent(logs) {
             `;
 
             const keyboard = Markup.inlineKeyboard([
-                [Markup.button.url('🔍 View Transaction', `https://base.blockscout.com/tx/${transactionHash}`), Markup.button.url('🏦 Open SavvyCircle', 'https://t.me/SavvyLiskBot/savvyLisk')],
+                [Markup.button.url('🔍 View Transaction', `https://sepolia.basescan.org/tx/${transactionHash}`), Markup.button.url('🏦 Open SavvyCircle', 'https://t.me/SavvyCBot/circle')],
 
             ]);
 
@@ -267,7 +267,7 @@ async function handleLoanDistributedEvent(logs) {
 function handleSavvyCommand(ctx) {
     return ctx.reply('Ready to get savvy with your finances? Click below to open SavvyCircle:',
         Markup.inlineKeyboard([
-            [Markup.button.url('🏦 Open SavvyCircle', 'https://t.me/SavvyLiskBot/savvyLisk')]
+            [Markup.button.url('🏦 Open SavvyCircle', 'https://t.me/SavvyCBot/circle')]
         ])
     );
 }
@@ -326,7 +326,7 @@ Keep growing together! 🌱💰
         `;
 
         const keyboard = Markup.inlineKeyboard([
-            [Markup.button.url('View Details in SavvyCircle', 'https://t.me/SavvyLiskBot/savvyLisk')]
+            [Markup.button.url('View Details in SavvyCircle', 'https://t.me/SavvyCBot/circle')]
         ]);
 
         await ctx.reply(message, { parse_mode: 'HTML', ...keyboard });
@@ -445,8 +445,8 @@ async function handleCreateGroup(ctx) {
             `Group "${groupName}" created successfully! Open the app to set monthly contribution`,
             Markup.inlineKeyboard([
                 [
-                    Markup.button.url('🏦 Open SavvyCircle', 'https://t.me/SavvyLiskBot/savvyLisk'),
-                    Markup.button.url('🔍 View Transaction', `https://base.blockscout.com/tx/${hash}`)
+                    Markup.button.url('🏦 Open SavvyCircle', 'https://t.me/SavvyCBot/circle'),
+                    Markup.button.url('🔍 View Transaction', `https://sepolia.basescan.org/tx/${hash}`)
                 ]
             ])
         );
@@ -571,7 +571,7 @@ Total Savings: <b>${totalSavings} ${sym}</b>
 Keep up the great work! 🎉
         `;
         const keyboard = Markup.inlineKeyboard([
-            [Markup.button.url('🏦 Open SavvyCircle', 'https://t.me/SavvyLiskBot/savvyLisk')],
+            [Markup.button.url('🏦 Open SavvyCircle', 'https://t.me/SavvyCBot/circle')],
 
         ]);
 
@@ -705,8 +705,8 @@ const handleTokenSelection = async (ctx, tokenType) => {
         // Create inline keyboard
         const inlineKeyboard = Markup.inlineKeyboard([
             [
-                Markup.button.url('🏦 Open SavvyCircle', 'https://t.me/SavvyLiskBot/savvyLisk'),
-                Markup.button.url('🔍 View Transaction', `https://base.blockscout.com/tx/${txHash}`)
+                Markup.button.url('🏦 Open SavvyCircle', 'https://t.me/SavvyCBot/circle'),
+                Markup.button.url('🔍 View Transaction', `https://sepolia.basescan.org/tx/${txHash}`)
             ]
         ]);
 
@@ -879,7 +879,7 @@ async function handleJoinGroup(ctx) {
             return ctx.reply(
                 `${name}, you're already a member of this group. No need to join again! Check your app for more details`,
                 Markup.inlineKeyboard([
-                    [Markup.button.url('🏦 Open SavvyCircle', 'https://t.me/SavvyLiskBot/savvyLisk')]
+                    [Markup.button.url('🏦 Open SavvyCircle', 'https://t.me/SavvyCBot/circle')]
                 ])
             );
         }
@@ -968,8 +968,8 @@ async function handleJoinGroup(ctx) {
             `Welcome ${name}! You've successfully joined "${groupName}"`,
             Markup.inlineKeyboard([
                 [
-                    Markup.button.url('🏦 Open SavvyCircle', 'https://t.me/SavvyLiskBot/savvyLisk'),
-                    Markup.button.url('🔍 View Transaction', `https://base.blockscout.com/tx/${hash}`)
+                    Markup.button.url('🏦 Open SavvyCircle', 'https://t.me/SavvyCBot/circle'),
+                    Markup.button.url('🔍 View Transaction', `https://sepolia.basescan.org/tx/${hash}`)
                 ]
             ])
         );
